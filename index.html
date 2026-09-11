@@ -391,6 +391,44 @@ h3,
 .modalhead {
   background: #f4f5ed;
 }
+.plot-mode-switch {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 22px; padding: 6px;
+  border: 1px solid rgb(24 56 46 / 14%); border-radius: 15px; background: #f2f5eb;
+}
+.plot-mode-switch button {
+  display: grid; justify-content: start; gap: 1px; padding: 10px 12px;
+  border-color: transparent; background: transparent; text-align: left;
+}
+.plot-mode-switch button[aria-pressed="true"] {
+  border-color: rgb(24 56 46 / 16%); background: var(--studio-card); box-shadow: 0 2px 7px rgb(24 56 46 / 8%);
+}
+.plot-mode-switch span {
+  color: #5d746a; font-size: 11px; font-weight: 400;
+}
+.plot-guide-lead {
+  max-width: 520px; color: #49675a;
+}
+.plot-guide {
+  display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(220px, .95fr);
+  gap: 20px; align-items: center; margin: 20px 0;
+}
+.plot-guide-map {
+  padding: 12px; border: 1px solid rgb(24 56 46 / 13%); border-radius: 17px; background: #f2f5eb;
+}
+.plot-guide-map svg { display: block; width: 100%; height: 230px; }
+.plot-guide-key { display: grid; gap: 5px; margin-top: 9px; color: #526f62; font-size: 11px; }
+.plot-guide-key span { display: flex; align-items: center; gap: 6px; }
+.plot-guide-key i { display: inline-block; width: 17px; height: 7px; }
+.guide-house { border: 1px dashed #315d47; background: #fff9; }
+.guide-margin { border-top: 2px dashed #ba8156; }
+.guide-entry { border-top: 3px solid #bd8a4e; }
+.plot-steps { display: grid; gap: 11px; margin: 0; padding-left: 22px; }
+.plot-steps li { padding-left: 3px; }
+@media (max-width: 600px) {
+  .plot-mode-switch { grid-template-columns: 1fr; }
+  .plot-guide { grid-template-columns: 1fr; }
+  .plot-guide-map svg { height: 200px; }
+}
 .footer {
   margin-top: 42px;
   padding: 22px 2px 34px;
@@ -868,7 +906,7 @@ function validateState(s){
 let state=blankState(),storageAvailable=!PUBLIC_MODE,loadError='',conflict=false,lastSavedRevision=0,repoSyncState=REPO_SYNC?'loading':'off';
 if(storageAvailable){try{localStorage.setItem(KEY+'.probe','1');localStorage.removeItem(KEY+'.probe')}catch(e){storageAvailable=false}}
 if(storageAvailable){try{let raw=localStorage.getItem(KEY);if(raw)state=validateState(JSON.parse(raw));lastSavedRevision=state.revision}catch(e){storageAvailable=false;loadError=e.message}}
-let tab='map', selectedPlot=1, zoneFilter=-1,showEnvelope=true,showSetbacks=false,showVolumes=false,showNames=false;
+let tab='map', selectedPlot=1, zoneFilter=-1,showEnvelope=true,showSetbacks=false,showVolumes=false,showNames=false,plotDetailMode='simple';
 let draftName='', viewBox=[0,0,DATA.world.width,DATA.world.height],history=[],demoBackup=null,pending=null,lastResult=null;
 const grp=()=>state.groups.find(g=>g.id===state.activeGroup), entryByPlot=id=>grp().entries.find(e=>e.plotId===Number(id)),entryByCard=id=>grp().entries.find(e=>e.cardId===Number(id));
 const freePlots=()=>DATA.plots.filter(p=>!entryByPlot(p.id)),freeCards=()=>DATA.cards.filter(c=>!entryByCard(c.id));
@@ -1012,7 +1050,11 @@ function cardDetails(c,technicalOpen=false){
  return `<div class="split"><span class="eyebrow muted">${cardLabel(c.id)} · ${esc(c.title)}</span><span class="badge">${c.floors} ${c.floors===1?'этаж':'этажа'}</span></div><h2 class="card-detail-title">${esc(s.name)}</h2><p class="person-meta">${ageLabel(s.age)} · ${esc(s.role)}</p><div class="story-visuals"><div>${houseSVG(c)}<p class="caption">Дом на картинке задаёт настроение, а не готовую планировку.</p></div>${portraitHTML(c)}</div><blockquote class="story-quote">«${esc(s.quote)}»</blockquote><p class="story-copy">${esc(s.story)}</p><section class="story-brief"><span class="eyebrow muted">Что важно в проекте</span><h3>${esc(c.title)}</h3><p>${esc(sentence(c.features))}</p></section><details class="technical-details"${open}><summary>Точные условия и проверка</summary><div class="technical-body"><dl class="spec-grid"><div><dt>Площадь дома</dt><dd>${c.areaMin}–${c.areaMax} м²</dd></div><div><dt>Кровля</dt><dd>${esc(c.roofLabel)}</dd></div><div><dt>Зона для дома</dt><dd>12 × 16 м</dd></div><div><dt>Что сдаём</dt><dd>RVT + 2 листа PDF</dd></div></dl><section class="section"><h4>Помещения</h4><p>${esc(sentence(c.rooms))}</p></section><section class="section"><h4>Что проверит преподаватель</h4><p>${esc(c.check)}</p></section><section class="section"><h4>Лестница и ограждение</h4><p>${esc(sentence(c.staircase))}</p></section><div class="state-notice tiny">${esc(DATA.common[3])}</div></div></details>`;
 }
 function passportDetails(p,coords=true){return `<div class="eyebrow muted">${plotLabel(p.id)} · ${esc(DATA.zones[p.zone].name)}</div><h2>${esc(p.title)}</h2><div class="passport-grid"><div class="passport-map">${plotSVG(p)}<p class="caption">Север сверху. Зелёный пунктир показывает зону для дома, терракотовый — учебные отступы.</p></div><div><dl class="spec-grid"><div><dt>Площадь участка</dt><dd>${fmt(p.area)} м²</dd></div><div><dt>Габариты</dt><dd>${p.width} × ${p.depth} м</dd></div><div><dt>Форма</dt><dd>${esc(p.shape)}</dd></div><div><dt>Вход со стороны</dt><dd>${p.front}</dd></div><div><dt>Отступ от улицы</dt><dd>5 м</dd></div><div><dt>Остальные отступы</dt><dd>3 м</dd></div><div><dt>Зона для дома</dt><dd>12 × 16 м</dd></div><div><dt>Озеленение не менее</dt><dd>${fmt(p.area*.3)} м²</dd></div></dl><div class="state-notice"><b>${esc(p.conditionTitle)}</b><br>${esc(p.condition)}</div></div></div>${coords?`<section class="section"><h4>Координаты границы, метры</h4><table class="table coordtable"><thead><tr><th>Точка</th><th>X / восток</th><th>Y / север</th><th>До следующей точки</th></tr></thead><tbody>${p.polygon.map((v,i)=>`<tr><td>${i+1}</td><td>${fmt(v[0],3)}</td><td>${fmt(v[1],3)}</td><td>${fmt(Math.hypot(v[0]-p.polygon[(i+1)%p.polygon.length][0],v[1]-p.polygon[(i+1)%p.polygon.length][1]),3)} м</td></tr>`).join('')}</tbody></table><p class="caption">Точка начала: X = ${p.origin[0]} м, Y = ${p.origin[1]} м, Z = 0. В локальном DXF из всех координат вычтена эта точка. Поворота нет.</p></section>`:''}<div class="notice" style="margin-top:15px;border-radius:12px;text-align:left">Размеры и ограничения придуманы для учебного задания. Для реального строительства их использовать нельзя.</div>`}
-function openPlot(id){let p=getPlot(id),e=PUBLIC_MODE?null:entryByPlot(id);openModal(plotLabel(id),passportDetails(p)+`<div class="modalactions"><button data-action="plot-dxf-global" data-id="${id}">Скачать DXF в общих координатах</button><button data-action="plot-dxf-local" data-id="${id}">Скачать локальный DXF</button><button data-action="plot-svg" data-id="${id}">Скачать SVG</button><button data-action="print-plot" data-id="${id}">Печать</button>${PUBLIC_MODE?'':e?`<button class="primary" data-action="assignment" data-id="${esc(e.id)}">Открыть работу студента</button>`:`<button class="primary" data-action="draw-fixed" data-id="${id}">Выдать этот участок</button>`}</div>`)}
+function plotGuide(p){return `<div class="eyebrow muted">${plotLabel(p.id)} · первое знакомство</div><h2>Что сделать на участке</h2><p class="plot-guide-lead">Сначала соберите простую схему. Точные координаты пока не нужны.</p><div class="plot-guide"><div class="plot-guide-map">${plotSVG(p)}<div class="plot-guide-key"><span><i class="guide-house"></i>место для дома</span><span><i class="guide-margin"></i>граница, за которую дом не выходит</span><span><i class="guide-entry"></i>вход с улицы</span></div></div><ol class="plot-steps"><li>Поставьте дом в зелёный пунктир: это площадка <b>12 × 16 м</b>.</li><li>Не выводите дом за оранжевую линию. До улицы оставьте <b>5 м</b>, до других сторон — <b>3 м</b>.</li><li>Продумайте путь от улицы к входу: вход со стороны <b>${esc(p.front)}</b>.</li><li>Учтите условие участка: <b>${esc(p.conditionTitle)}</b> — ${esc(p.condition)}</li></ol></div><div class="state-notice"><b>Не нужно разбираться в координатах сейчас.</b><br>Сначала покажите преподавателю, где стоит дом и как к нему попасть.</div><p class="caption">Отступы и размеры здесь учебные: они нужны для этого задания, а не для реального строительства.</p>`}
+function plotModeControls(p){return `<div class="plot-mode-switch" role="group" aria-label="Режим просмотра участка"><button data-action="plot-mode" data-id="${p.id}:simple" aria-pressed="${plotDetailMode==='simple'}"><b>Понятно</b><span>что делать на участке</span></button><button data-action="plot-mode" data-id="${p.id}:technical" aria-pressed="${plotDetailMode==='technical'}"><b>Точные данные</b><span>размеры, координаты и DXF</span></button></div>`}
+function plotContextAction(p){let e=PUBLIC_MODE?null:entryByPlot(p.id);return PUBLIC_MODE?'':e?`<button class="primary" data-action="assignment" data-id="${esc(e.id)}">Открыть работу студента</button>`:`<button class="primary" data-action="draw-fixed" data-id="${p.id}">Выдать этот участок</button>`}
+function plotModal(p){let technical=plotDetailMode==='technical';return plotModeControls(p)+(technical?passportDetails(p):plotGuide(p))+`<div class="modalactions">${technical?`<button data-action="plot-dxf-global" data-id="${p.id}">Скачать DXF в общих координатах</button><button data-action="plot-dxf-local" data-id="${p.id}">Скачать локальный DXF</button><button data-action="plot-svg" data-id="${p.id}">Скачать SVG</button><button data-action="print-plot" data-id="${p.id}">Печать</button>`:''}${plotContextAction(p)}</div>`}
+function openPlot(id){plotDetailMode='simple';let p=getPlot(id);openModal(plotLabel(id),plotModal(p))}
 function openCard(id){let c=getCard(id),e=PUBLIC_MODE?null:entryByCard(id);openModal(cardLabel(id),cardDetails(c)+`<div class="modalactions"><button data-action="print-card" data-id="${id}">Печать</button>${PUBLIC_MODE?'':e?`<button class="primary" data-action="assignment" data-id="${esc(e.id)}">Открыть ${plotLabel(e.plotId)}</button>`:`<button class="primary" data-action="card-fixed" data-id="${id}">Выдать это задание</button>`}</div>`)}
 function openAssignment(id){let e=grp().entries.find(e=>e.id===id);if(!e)throw Error('Задание уже удалено.');let c=getCard(e.cardId),p=getPlot(e.plotId);openModal('Задание студента',`<div class="eyebrow muted">${esc(grp().name)} · ${plotLabel(e.plotId)} · ${cardLabel(e.cardId)}</div><h2>${esc(e.student)}</h2><div class="actions" style="margin:15px 0"><button class="primary" data-action="student-html" data-id="${esc(id)}">HTML для студента</button><button data-action="print-assignment" data-id="${esc(id)}">Печать / PDF</button><button data-action="copy-assignment" data-id="${esc(id)}">Текст в чат</button><button data-action="plot-dxf-global" data-id="${p.id}">Подложка DXF</button></div><details open><summary style="cursor:pointer;font-weight:650;margin:18px 0">${plotLabel(p.id)} · ${esc(p.title)}</summary>${passportDetails(p,false)}</details><hr class="divider"><details open><summary style="cursor:pointer;font-weight:650;margin:18px 0">${cardLabel(c.id)} · ${esc(c.title)}</summary>${cardDetails(c)}</details><hr class="divider"><h3>Что уже принято</h3><div class="form-field"><label for="entryName">Имя студента</label><input id="entryName" maxlength="80" value="${esc(e.student)}"></div><label for="entryStage">Последний готовый этап</label><select id="entryStage" class="wide"><option value="0">Пока ни один</option>${DATA.stages.map(s=>`<option value="${s.id}" ${s.id===e.stage?'selected':''}>${s.id}. ${esc(s.title)}</option>`).join('')}</select><div class="form-field"><label for="entryNotes">Комментарий преподавателя</label><textarea id="entryNotes" maxlength="3000">${esc(e.notes)}</textarea></div><div class="score-grid">${['Модель / 40','Условия / 25','Листы / 20','Защита / 15'].map((label,i)=>`<div><label for="score${i}">${label}</label><input id="score${i}" type="number" min="0" max="${[40,25,20,15][i]}" step="0.5" value="${e.scores[i]??''}"></div>`).join('')}</div><p class="caption">Оставьте поле пустым, если оценка ещё не выставлена.</p><div class="modalactions"><button class="primary" data-action="save-entry" data-id="${esc(id)}">Сохранить</button><button class="danger" data-action="release" data-id="${esc(id)}">Снять задание</button></div>`)}
 function saveEntry(id){let name=$('#entryName').value.trim().replace(/\s+/g,' '),stage=Number($('#entryStage').value),notes=$('#entryNotes').value,scores=[0,1,2,3].map(i=>$('#score'+i).value===''?null:Number($('#score'+i).value));commit('Обновлена приёмка: '+name,()=>{let e=grp().entries.find(e=>e.id===id);Object.assign(e,{student:name,stage,notes,scores})});render();toast('Приёмка сохранена');closeModal()}
@@ -1063,7 +1105,7 @@ function demoExit(){if(!demoBackup)return;state=demoBackup.state;history=demoBac
 function undo(){if(conflict)throw Error('Отмена остановлена: реестр изменён в другой вкладке.');if(!demoBackup&&storageAvailable){let raw=localStorage.getItem(KEY);if(raw&&JSON.parse(raw).revision!==lastSavedRevision){conflict=true;updateStorage();throw Error('Отмена остановлена: реестр изменён в другой вкладке.')}}if(!history.length)return;if(!confirm('Отменить последнее действие? Текущее состояние будет заменено предыдущим.'))return;let prior=history.pop(),rev=state.revision;state=validateState(prior);state.revision=rev+1;state.updatedAt=new Date().toISOString();grp().log.push({time:state.updatedAt,action:'Отменено последнее действие (история текущей сессии)'});persist();lastResult=null;render();toast('Последнее действие отменено')}
 const actions={
  'modal-close':closeModal,'export-json':exportJSON,'export-csv':exportCSV,'draw-one':drawOne,'bulk-open':bulkOpen,'bulk-preview':bulkPreview,'bulk-confirm':bulkConfirm,'demo':demoStart,'demo-exit':demoExit,'undo':undo,
- 'plot-passport':id=>openPlot(Number(id)),'plot-jump':id=>{closeModal();selectPlot(id)},'assignment':openAssignment,'save-entry':saveEntry,
+ 'plot-passport':id=>openPlot(Number(id)),'plot-mode':id=>{let [plotId,mode]=id.split(':');plotDetailMode=mode==='technical'?'technical':'simple';$('#modalBody').innerHTML=plotModal(getPlot(plotId));$('#modalBody').parentElement.scrollTop=0},'plot-jump':id=>{closeModal();selectPlot(id)},'assignment':openAssignment,'save-entry':saveEntry,
  'draw-fixed':id=>{closeModal();tab='draw';render();$('#drawPlot').value=id;$('#studentName').focus()},
  'card-fixed':id=>{closeModal();tab='draw';render();$('#drawCard').value=id;$('#drawCard').closest('details').open=true;$('#studentName').focus()},
  'toggle-envelope':()=>{showEnvelope=!showEnvelope;render()},'toggle-setbacks':()=>{showSetbacks=!showSetbacks;render()},'toggle-volumes':()=>{showVolumes=!showVolumes;render();if(showVolumes)toast('Это символы выданных заданий, не реальные RVT-модели.')},
