@@ -559,6 +559,22 @@ h3,
 .guide-settings dt { color: #60766b; font-size: 12px; }
 .guide-settings dd { margin: 2px 0 0; font-size: 13px; }
 .guide-settings dd span { color: #60766b; font-size: 11px; }
+.guide-walkthrough-intro { margin: 20px 0 0; color: #5d746a; font-size: 14px; }
+.guide-walkthrough { display: grid; gap: 16px; margin-top: 16px; }
+.guide-step { padding: 20px; border: 1px solid rgb(24 56 46 / 15%); border-radius: 20px; background: #fff; }
+.guide-step-head { display: flex; gap: 14px; align-items: center; }
+.guide-step-num { color: #bd6b42; font-size: clamp(25px, 4vw, 34px); font-weight: 750; letter-spacing: -.05em; line-height: 1; }
+.guide-step-tag { color: #547264; font-size: 10px; font-weight: 700; letter-spacing: .12em; }
+.guide-step h4 { margin: 3px 0 0; color: #244c3b; font-size: 20px; }
+.guide-step-image { margin: 16px 0; overflow: hidden; border: 1px solid rgb(24 56 46 / 14%); border-radius: 14px; background: #f4f6ef; }
+.guide-step-image img { display: block; width: 100%; max-height: 410px; object-fit: contain; }
+.guide-step-image figcaption { padding: 10px 13px; color: #5d746a; font-size: 12px; line-height: 1.45; }
+.guide-step-image a { color: #315b43; }
+.guide-step-diagram img { max-height: 350px; }
+.guide-step-copy { display: grid; gap: 8px; }
+.guide-step-copy p { margin: 0; color: #4d675d; font-size: 14px; }
+.guide-step-copy b { display: inline-block; min-width: 116px; color: #315b43; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
+.guide-step-accept { margin: 16px 0 0; padding: 11px 13px; border-radius: 11px; background: #eaf0e3; color: #355a48; font-size: 13px; }
 .guide-roadmap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
 .guide-roadmap div { display: grid; gap: 4px; padding: 16px; border-radius: 15px; background: #eef3e8; }
 .guide-roadmap b { color: #315b43; }
@@ -577,7 +593,7 @@ h3,
 .guide-sources { margin-top: 24px; color: #5d746a; font-size: 12px; }
 .guide-sources p + p { margin-top: 8px; }
 @media (max-width: 760px) { .guide-hero { grid-template-columns: 1fr; padding: 24px; } .guide-hero-badge { grid-template-columns: auto 1fr; column-gap: 12px; } .guide-hero-badge b { margin-top: 0; } .guide-rule-grid, .guide-roadmap, .guide-deliverables { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 500px) { .guide-hero { padding: 21px; } .guide-section { padding: 23px 0; } .guide-settings { padding: 15px; } .guide-settings dl, .guide-rule-grid, .guide-roadmap, .guide-deliverables, .guide-troubles dl { grid-template-columns: 1fr; } .guide-section-title h3 { font-size: 20px; } }
+@media (max-width: 500px) { .guide-hero { padding: 21px; } .guide-section { padding: 23px 0; } .guide-settings, .guide-step { padding: 15px; } .guide-settings dl, .guide-rule-grid, .guide-roadmap, .guide-deliverables, .guide-troubles dl { grid-template-columns: 1fr; } .guide-section-title h3 { font-size: 20px; } .guide-step-head { align-items: flex-start; } .guide-step-copy b { display: block; margin-bottom: 3px; } }
 </style></head><body>
 <div id="storageWarning" class="notice" hidden></div><div id="demoBanner" class="demo-banner" hidden>Пробный режим. Основная раздача не изменяется. <button class="small" data-action="demo-exit">Вернуться к своей группе</button></div>
 <div class="wrap"><header class="top"><div class="brand"><mark id="brandIcon"></mark><div>соседи <small>/ 40</small></div></div><div class="topactions teacher-only"><span id="storageStatus" class="storage-pill"></span><select id="groupSelect" aria-label="Учебная группа"></select><button class="iconbtn" data-action="group-new" title="Создать отдельный посёлок" aria-label="Создать отдельный посёлок">+</button><button data-action="export-json">↓ Сохранить JSON</button></div></header>
@@ -926,7 +942,7 @@ const STUDENT_GUIDE_HTML = `
       <li>Сделайте два маленьких эскиза посадки: где стоит дом, где вход, парковка и путь от улицы. Выберите более понятный вариант вместе с преподавателем.</li>
     </ol>
     <div class="guide-rule-grid"><div><b>Дом и пристройки</b><span>целиком внутри рабочей зоны 12 × 16 м.</span></div><div><b>Учебные отступы</b><span>5 м от улицы, 3 м от остальных границ.</span></div><div><b>Участок</b><span>парковка 3 × 5,5 м и не менее 30% условного озеленения.</span></div></div>
-    <figure class="guide-figure"><img src="__GUIDE_ASSETS__guide-plot-placement-v1.png" alt="Учебная схема: дом внутри зелёной зоны застройки на участке, рядом дерево с охранной зоной и отступ от улицы" loading="lazy"><figcaption>Схема, а не план конкретного участка: сначала разместите дом внутри рабочей зоны, затем проверьте отступы, вход и дерево.</figcaption></figure>
+    <figure class="guide-figure"><img src="__GUIDE_ASSETS__guide-plot-placement-v2.png" alt="Учебная схема участка: зона для дома 12 на 16 метров, учебные отступы, вход с улицы и дерево, которое нужно сохранить" loading="lazy"><figcaption>Учебная схема: сначала разместите дом внутри зоны 12 × 16 м, затем проверьте отступы, вход и дерево. Это не план конкретного участка и не измерительный чертёж.</figcaption></figure>
   </section>
 
   <section class="guide-section">
@@ -945,13 +961,41 @@ const STUDENT_GUIDE_HTML = `
     <ol class="guide-list">
       <li>Откройте <b>Revit 2024</b>. Создайте новый проект из шаблона, который дал преподаватель.</li>
       <li>Сразу сохраните файл: <code>plot_XX_Фамилия_v01.rvt</code>. Например, <code>plot_01_Иванов_v01.rvt</code>.</li>
-      <li>Откройте план <b>Уровень 1</b>. На ленте выберите <b>Вставить → Связать САПР</b> (<em>Insert → Link CAD</em>).</li>
-      <li>Выберите файл <code>plot_XX_global_mm.dxf</code>.</li>
     </ol>
-    <div class="guide-settings"><h4>Настройки в окне «Связать форматы САПР»</h4><dl><div><dt>Единицы импорта</dt><dd><b>Миллиметры</b></dd></div><div><dt>Размещение</dt><dd><b>Авто — Начало в начало</b><br><span>Auto — Origin to Origin</span></dd></div><div><dt>Разместить на</dt><dd><b>Уровень 1</b></dd></div><div><dt>Только текущий вид</dt><dd><b>Не включать</b></dd></div><div><dt>Слои</dt><dd><b>Все</b></dd></div><div><dt>Цвета</dt><dd>Чёрно-белые — можно, если так удобнее читать подложку.</dd></div></dl></div>
-    <ol class="guide-list" start="5"><li>Нажмите <b>Открыть</b>, затем <b>ZE</b> или «Масштабировать всё», если участок не виден.</li><li>На подложке найдите контрольную линию <code>CHECK = 10000 mm</code>. Инструментом «Размер» или «Измерить» она должна быть <b>10 000 мм</b>. Только после этого продолжайте.</li><li>Выделите связь DXF и закрепите её кнопкой <b>Закрепить</b> (Pin). Не двигайте и не поворачивайте подложку.</li></ol>
+    <p class="guide-walkthrough-intro">Дальше — один непрерывный маршрут. В каждом блоке сначала повторите действие, затем сверьте результат по зелёной строке.</p>
+    <div class="guide-walkthrough" aria-label="Пошаговое связывание DXF в Revit">
+      <article class="guide-step">
+        <header class="guide-step-head"><span class="guide-step-num">03.1</span><div><span class="guide-step-tag">В REVIT</span><h4>Откройте связку DXF</h4></div></header>
+        <figure class="guide-step-image"><img src="__GUIDE_ASSETS__autodesk-link-cad-dialog-ru.png" alt="Окно Autodesk Revit «Связать форматы САПР» со списком параметров связи DXF" loading="lazy"><figcaption>Реальный экран Revit из Autodesk; английские подписи на этой копии переведены для курса с помощью ИИ. Он показывает, где находятся поля. Значения <em>meter</em> и <em>Manual - Origin</em> на примере не относятся к этому курсу. <a href="https://help.autodesk.com/cloudhelp/2022/ENU/Revit-Model/files/GUID-5A021344-77C9-449B-8428-EA5C8B786E09.htm" target="_blank" rel="noopener noreferrer">Оригинал и источник Autodesk</a>.</figcaption></figure>
+        <div class="guide-step-copy"><p><b>Сделайте</b> Откройте план <b>Уровень 1</b>, затем <b>Вставить → Связать САПР</b> (<em>Insert → Link CAD</em>).</p><p><b>Выберите</b> Файл <code>plot_XX_global_mm.dxf</code> из своей папки.</p></div>
+        <p class="guide-step-accept"><b>Проверьте:</b> выбран именно глобальный DXF; его имя заканчивается на <code>_global_mm.dxf</code>.</p>
+      </article>
+      <article class="guide-step">
+        <header class="guide-step-head"><span class="guide-step-num">03.2</span><div><span class="guide-step-tag">В REVIT</span><h4>Выставьте настройки курса</h4></div></header>
+        <figure class="guide-step-image"><img src="__GUIDE_ASSETS__autodesk-origin-to-origin.png" alt="Схема Autodesk: начало координат CAD совмещается с внутренним началом Revit" loading="lazy"><figcaption>Схема Autodesk поясняет, почему начала координат должны совпасть. <a href="https://help.autodesk.com/cloudhelp/2024/ENU/Revit-Model/files/GUID-C922A152-0A30-4E27-BED2-BCE9FF2E5E30.htm" target="_blank" rel="noopener noreferrer">Источник Autodesk</a>.</figcaption></figure>
+        <div class="guide-step-copy"><p><b>Выберите</b> <b>Единицы импорта — Миллиметры</b>; <b>Размещение — Авто — Начало в начало</b> (<em>Auto — Origin to Origin</em>); <b>Разместить на — Уровень 1</b>; <b>Слои — Все</b>.</p><p><b>Оставьте выключенным</b> <b>Только текущий вид</b>. Цвета можно выбрать чёрно-белые, если так легче читать подложку.</p><p><b>Если в вашей версии</b> вместо <em>Auto — Origin to Origin</em> показано <em>Auto — Origin to Internal Origin</em>, выберите этот вариант: он также привязывает CAD к внутреннему началу Revit.</p></div>
+        <p class="guide-step-accept"><b>Проверьте:</b> до нажатия «Открыть» указаны миллиметры и общий ноль, а не ручное размещение.</p>
+      </article>
+      <article class="guide-step">
+        <header class="guide-step-head"><span class="guide-step-num">03.3</span><div><span class="guide-step-tag">В REVIT</span><h4>Найдите подложку на плане</h4></div></header>
+        <figure class="guide-step-image"><img src="__GUIDE_ASSETS__autodesk-zoom-to-fit-ru.png" alt="Реальный интерфейс Autodesk Revit, где выделена команда «Показать всё»" loading="lazy"><figcaption>Реальный экран Revit из Autodesk; английские подписи на этой копии переведены для курса с помощью ИИ. Выделена команда <em>Показать всё</em> (<em>Zoom To Fit</em>). <a href="https://www.autodesk.com/learn/ondemand/curated/door-and-window-layout-and-design-in-revit/5ANoreADGVJamKNFTlVloM" target="_blank" rel="noopener noreferrer">Оригинал и источник Autodesk</a>.</figcaption></figure>
+        <div class="guide-step-copy"><p><b>Сделайте</b> Нажмите <b>Открыть</b>. Если участок не виден, выполните <b>Zoom To Fit</b>: клавиша <b>ZF</b> или команда из контекстного меню.</p><p><b>Посмотрите</b> На плане <b>Уровень 1</b> должны появиться границы участка и рабочая зона.</p></div>
+        <p class="guide-step-accept"><b>Проверьте:</b> весь участок попадает в экран и DXF не сдвинут вручную.</p>
+      </article>
+      <article class="guide-step">
+        <header class="guide-step-head"><span class="guide-step-num">03.4</span><div><span class="guide-step-tag">В REVIT</span><h4>Измерьте контрольную линию</h4></div></header>
+        <figure class="guide-step-image"><img src="__GUIDE_ASSETS__autodesk-measure.png" alt="Реальный экран Autodesk Revit с измерением между двумя точками" loading="lazy"><figcaption>Реальный экран Revit показывает способ измерения; число <em>6701.81</em> на нём — не контроль курса. <a href="https://help.autodesk.com/cloudhelp/2024/ENU/Revit-Model/files/GUID-65EA44EC-C777-4C97-8718-5783C3A80B0A.htm" target="_blank" rel="noopener noreferrer">Источник Autodesk</a>.</figcaption></figure>
+        <div class="guide-step-copy"><p><b>Сделайте</b> На вкладке <b>Изменить</b> откройте <b>Измерить</b> и выберите две крайние точки линии <code>CHECK = 10000 mm</code>.</p><p><b>Не исправляйте масштаб вручную</b> Если значение не совпало, удалите связь и подключите тот же глобальный DXF заново с миллиметрами.</p></div>
+        <p class="guide-step-accept"><b>Проверьте:</b> размер контрольной линии — ровно <b>10 000 мм</b>. Только после этого стройте дом.</p>
+      </article>
+      <article class="guide-step">
+        <header class="guide-step-head"><span class="guide-step-num">03.5</span><div><span class="guide-step-tag">В REVIT</span><h4>Закрепите связь DXF</h4></div></header>
+        <figure class="guide-step-image guide-step-diagram"><img src="__GUIDE_ASSETS__guide-dxf-link-v2.png" alt="Учебная схема: глобальный DXF связывается с моделью Revit по общей точке 0,0 и закрепляется" loading="lazy"><figcaption>Учебная схема, не снимок интерфейса: глобальный DXF остаётся подложкой, модель строится поверх него, общая точка 0,0 сохраняется, а связь закрепляется. Команда закрепления описана в <a href="https://help.autodesk.com/cloudhelp/2022/ENU/Revit-Model/files/GUID-D9EDB8DB-2D08-40B2-9979-2F1A5B5962F6.htm" target="_blank" rel="noopener noreferrer">справке Autodesk</a>.</figcaption></figure>
+        <div class="guide-step-copy"><p><b>Сделайте</b> Выделите связанную подложку DXF и нажмите <b>Закрепить</b> (<em>Pin</em>).</p><p><b>Дальше</b> Не двигайте, не поворачивайте и не масштабируйте связанный DXF. Стены, дорожки и дом создавайте поверх него.</p></div>
+        <p class="guide-step-accept"><b>Проверьте:</b> у связи включено закрепление; общая точка 0,0 сохранена для сборки посёлка.</p>
+      </article>
+    </div>
     <div class="guide-callout"><b>Почему именно так?</b> Глобальный DXF и «Начало в начало» дают всем домам общую точку 0,0. Преподаватель затем сможет связать RVT домов в один посёлок без ручного совмещения.</div>
-    <figure class="guide-figure"><img src="__GUIDE_ASSETS__guide-dxf-link-v1.png" alt="Учебная схема: чертёж DXF связывается с моделью дома по общей точке начала координат и закрепляется" loading="lazy"><figcaption>Концептуальная схема: DXF остаётся связанной подложкой, модель строится поверх него, а связь закрепляется после проверки масштаба.</figcaption></figure>
   </section>
 
   <section class="guide-section">
@@ -973,10 +1017,10 @@ const STUDENT_GUIDE_HTML = `
 
   <section class="guide-section guide-troubles">
     <div class="guide-section-title"><span>?</span><div><h3>Если что-то пошло не так</h3><p>Не маскируйте ошибку. Исправить основу проще, пока дом не построен.</p></div></div>
-    <dl><div><dt>DXF слишком большой или маленький</dt><dd>Связь добавили не в миллиметрах. Удалите неверную связь и добавьте этот же глобальный DXF заново с «Миллиметры». Не масштабируйте вручную.</dd></div><div><dt>Участок пропал</dt><dd>Откройте план Уровень 1, нажмите ZE. Проверьте, что связь DXF видима в этом виде.</dd></div><div><dt>Подложка сдвинулась</dt><dd>Остановитесь и покажите файл преподавателю. Не выравнивайте дом под новый DXF — нужна проверка исходной точки.</dd></div><div><dt>Не понимаете, что требует карточка</dt><dd>Принесите на занятие свой эскиз и конкретный вопрос. Не добавляйте случайные помещения «для красоты».</dd></div></dl>
+    <dl><div><dt>DXF слишком большой или маленький</dt><dd>Связь добавили не в миллиметрах. Удалите неверную связь и добавьте этот же глобальный DXF заново с «Миллиметры». Не масштабируйте вручную.</dd></div><div><dt>Участок пропал</dt><dd>Откройте план Уровень 1, нажмите ZF или выберите Zoom To Fit. Проверьте, что связь DXF видима в этом виде.</dd></div><div><dt>Подложка сдвинулась</dt><dd>Остановитесь и покажите файл преподавателю. Не выравнивайте дом под новый DXF — нужна проверка исходной точки.</dd></div><div><dt>Не понимаете, что требует карточка</dt><dd>Принесите на занятие свой эскиз и конкретный вопрос. Не добавляйте случайные помещения «для красоты».</dd></div></dl>
   </section>
 
-  <footer class="guide-sources"><p><b>Техническая основа.</b> Revit поддерживает DXF/DWG в командах Link CAD и Import CAD; для учебного проекта используем Link CAD, потому что связь можно управляемо перезагрузить или отключить. Autodesk описывает размещение <em>Auto — Origin to Origin</em> как совмещение постоянных начал координат.</p><p><a href="https://help.autodesk.com/cloudhelp/2025/ENU/Revit-Model/files/GUID-630EC38E-37FE-41BC-8369-2238825BF4F6.htm" target="_blank" rel="noopener noreferrer">Autodesk: Import CAD и Link CAD</a> · <a href="https://help.autodesk.com/cloudhelp/2024/ENU/Revit-Model/files/GUID-C922A152-0A30-4E27-BED2-BCE9FF2E5E30.htm" target="_blank" rel="noopener noreferrer">Autodesk: размещение связей и импортов</a></p></footer>
+  <footer class="guide-sources"><p><b>Техническая основа.</b> Revit поддерживает DXF/DWG в командах Link CAD и Import CAD; для учебного проекта используем Link CAD, потому что связью можно управлять. Autodesk описывает размещение <em>Auto — Origin to Origin</em> как совмещение постоянных начал координат.</p><p>Autodesk screen shots reprinted courtesy of Autodesk, Inc. Учебные значения и пояснения в этой памятке подготовлены для курса; название пункта и расположение команды могут немного отличаться в другой версии Revit.</p><p><a href="https://help.autodesk.com/cloudhelp/2025/ENU/Revit-Model/files/GUID-630EC38E-37FE-41BC-8369-2238825BF4F6.htm" target="_blank" rel="noopener noreferrer">Autodesk: Import CAD и Link CAD</a> · <a href="https://help.autodesk.com/cloudhelp/2024/ENU/Revit-Model/files/GUID-C922A152-0A30-4E27-BED2-BCE9FF2E5E30.htm" target="_blank" rel="noopener noreferrer">Autodesk: размещение связей и импортов</a> · <a href="https://www.autodesk.com/company/legal-notices-trademarks/intellectual-property/copyright" target="_blank" rel="noopener noreferrer">Autodesk: разрешение на использование скриншотов</a></p></footer>
 </article>`;
 
 'use strict';
