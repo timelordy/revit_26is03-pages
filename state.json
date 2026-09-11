@@ -1,17 +1,33 @@
 {
   "schema": "sosedi40-state-v3",
   "datasetId": "3de169b65ae75d76",
-  "revision": 7,
+  "revision": 8,
   "activeGroup": "g-main",
   "groups": [
     {
       "id": "g-main",
       "name": "26ИС03 · общий посёлок",
       "seed": "sosedi40-main-2026-09",
-      "drawCount": 2,
-      "entries": [],
+      "drawCount": 3,
+      "entries": [
+        {
+          "id": "g-main-3-1789115124474",
+          "student": "Участник П-22",
+          "plotId": 22,
+          "cardId": 35,
+          "stage": 0,
+          "notes": "",
+          "scores": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "time": "2026-09-11T08:25:24.474Z"
+        }
+      ],
       "log": []
     }
   ],
-  "updatedAt": "2026-09-10T16:16:31.856Z"
+  "updatedAt": "2026-09-11T08:25:24.475Z"
 }
