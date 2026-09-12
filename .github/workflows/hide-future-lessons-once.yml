@@ -1,0 +1,43 @@
+name: Hide future Revit lessons once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/hide-future-lessons-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch-public-site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restrict visible lessons
+        shell: python
+        run: |
+          from pathlib import Path
+
+          index = Path("index.html")
+          text = index.read_text(encoding="utf-8")
+          old = "const firstSemesterLessons = () => REVIT_LESSONS.filter(lesson => lesson.semester === 1);"
+          new = "const firstSemesterLessons = () => REVIT_LESSONS.filter(lesson => lesson.semester === 1 && lesson.number <= 2);"
+
+          if old in text:
+              index.write_text(text.replace(old, new, 1), encoding="utf-8")
+          elif new not in text:
+              raise SystemExit("Lesson visibility line was not found; refusing an unsafe patch.")
+
+          Path(".github/workflows/hide-future-lessons-once.yml").unlink()
+
+      - name: Commit public site update
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/hide-future-lessons-once.yml
+          git diff --cached --quiet && exit 0
+          git commit -m "Hide Revit lessons after lesson 2"
+          git push
