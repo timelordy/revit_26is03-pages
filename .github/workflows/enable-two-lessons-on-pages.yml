@@ -1,0 +1,56 @@
+name: Enable first two Revit pairs on Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/enable-two-lessons-on-pages.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify lesson script
+        run: node --check lessons-live.js
+
+      - name: Wire assets into published HTML
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path('index.html')
+          text = path.read_text(encoding='utf-8')
+          css = '<link rel="stylesheet" href="lessons-live.css">'
+          js = '<script src="lessons-live.js"></script>'
+
+          if css not in text:
+              marker = '</head>'
+              at = text.find(marker)
+              if at < 0:
+                  raise SystemExit('No </head> marker in index.html')
+              text = text[:at] + css + text[at:]
+
+          if js not in text:
+              marker = '</body>'
+              at = text.rfind(marker)
+              if at < 0:
+                  raise SystemExit('No final </body> marker in index.html')
+              text = text[:at] + js + text[at:]
+
+          path.write_text(text, encoding='utf-8')
+          Path('.github/workflows/enable-two-lessons-on-pages.yml').unlink()
+
+      - name: Commit live Pages update
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/enable-two-lessons-on-pages.yml
+          git diff --cached --quiet && exit 0
+          git commit -m "Show only first two Revit pairs on Pages"
+          git push
