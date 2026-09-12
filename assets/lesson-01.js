@@ -1,0 +1,246 @@
+/* Lesson 01. Shared by the public site and the source-built teacher app. */
+(() => {
+  'use strict';
+  if (window.S40Lesson01) return;
+  const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const help = (area, id, language = 'RUS') => `https://help.autodesk.com/cloudhelp/2024/${language}/Revit-${area}/files/GUID-${id}.htm`;
+  const sources = {
+    ui: help('GetStarted','7793667D-5657-4382-9BEC-F7CB6AC8F53E'),
+    tour: help('GetStarted','3197A4ED-323F-4D32-91C0-BA79E794B806'),
+    create: help('GetStarted','3FF8DDB0-A015-4F94-B9DA-1FA96181FCA3'),
+    open: help('GetStarted','E7EB9EDD-4167-4F64-9688-D7E7B7934806'),
+    options: help('Customize','150AF853-2413-439F-B8FB-B3DBCB827EDD'),
+    templates: help('Customize','4C16B54A-7ADA-4DEB-A278-C199B1BC4207'),
+    paths: help('Customize','76272D80-2BE0-4374-BCA9-74BAABF075EE'),
+    ribbon: help('GetStarted','1CA04013-04CE-4F55-9B0C-68FD7E7FF80B'),
+    ribbonVideo: help('GetStarted','DFFA6A87-82BD-46D2-B9FE-0E13C21624F3'),
+    quick: help('GetStarted','762F3BFE-2508-4255-936D-3BDFE45F1885'),
+    bar: help('GetStarted','28BDE98C-E8A9-4C74-8ABC-9DABD13163D9'),
+    properties: help('GetStarted','A764EA7A-FE26-469B-857C-F3A70812FC34'),
+    browser: help('GetStarted','C8D3E5A6-02A5-43A9-AFFC-D49DD27398B1'),
+    dock: help('GetStarted','2FCA3097-36CC-4EED-B6BB-BAF431EC9475'),
+    system: help('Model','A6600994-DFBE-4079-87F9-D6AC8681A915'),
+    load: help('Model','4E13773E-6FA4-4AA6-A506-8D04D39F4A05')
+  };
+  const link = (url, text) => `<a href="${escape(url)}" target="_blank" rel="noopener noreferrer">${escape(text)}</a>`;
+  const steps = items => `<ol class="r1-steps">${items.map(x => `<li>${x}</li>`).join('')}</ol>`;
+  const note = (title, text, kind = '') => `<aside class="r1-note ${kind}"><b>${title}</b><p>${text}</p></aside>`;
+  const answer = (question, text) => `<details class="r1-answer"><summary>${question}<span aria-hidden="true">+</span></summary><div>${text}</div></details>`;
+  const terms = rows => `<dl class="r1-terms">${rows.map(([en, ru]) => `<div><dt lang="en">${en}</dt><dd>${ru}</dd></div>`).join('')}</dl>`;
+  const refs = keys => `<p class="r1-refs">Справка Autodesk: ${keys.map(([key,label]) => link(sources[key], label)).join(' · ')}</p>`;
+  function figure(file, alt, caption, source, narrow = false) {
+    return `<figure class="r1-figure${narrow ? ' r1-figure-narrow' : ''}"><button type="button" class="r1-image-button" data-r1-image aria-label="Увеличить: ${escape(alt)}"><img src="__R1_ASSETS__${file}" alt="${escape(alt)}" loading="lazy" decoding="async"><span>Увеличить изображение ↗</span></button><figcaption>${caption} ${link(sources[source], 'Источник и справка')}.</figcaption></figure>`;
+  }
+  const topics = [
+    {
+      id: 'why', title: 'Зачем вообще Revit', hint: 'Модель, чертежи и пример с дверью', tags: 'BIM бим назначение применение задачи Sims майнкрафт Minecraft планы фасады',
+      body: `<p>Допустим, ты передвинул дверь на плане. На фасаде она тоже должна оказаться в новом месте. В Revit ты меняешь <b>одну дверь в модели</b>, а виды показывают это изменение. Не нужно отдельно двигать её на каждом чертеже.</p>
+      <div class="r1-example"><span class="r1-kicker">На знакомом примере</span><h4>В The Sims ты тоже ставишь дверь в стену</h4><p>Но здесь у двери есть не только внешний вид: семейство, размер, уровень, материал и другие параметры. Их можно использовать в чертежах и таблицах. Minecraft тоже помогает представить здание из отдельных элементов, но типовой блок сам по себе не становится строительным объектом с такими связями.</p></div>
+      <div class="r1-flow" aria-label="Одна модель и её представления"><div><b>Модель дома</b><span>Стены, двери, окна, параметры</span></div><span class="r1-flow-arrow" aria-hidden="true">→</span><div><b>План · фасад · разрез · 3D</b><span>Разные виды той же модели</span></div></div>
+      <p>На курсе делаем архитектурную модель дома. В Revit также работают с конструкциями и инженерными системами. Сам <b>BIM</b> шире одной программы: это работа с информационной моделью и данными о здании.</p>
+      <h4>Попробуй в Revit</h4>${steps([
+        'Открой учебный проект, который я показал на паре. Сначала сделай копию: <b>Файл → Сохранить как → Проект</b> (<span lang="en">File → Save As → Project</span>).',
+        'В Диспетчере проекта открой план этажа и 3D-вид. Дважды нажми на название каждого вида.',
+        'На плане выбери дверь и немного сдвинь её вдоль стены. Открой 3D и посмотри на ту же дверь.',
+        'Верни изменение через <kbd>Ctrl</kbd> + <kbd>Z</kbd>. Здесь проверяем связь видов, а не переделываем чужой дом.'
+      ])}
+      ${note('Что должно получиться', 'Дверь поменяла положение на плане и в 3D. Если на другом виде её не видно, это ещё не значит, что дверь пропала: у вида могут быть свои настройки видимости.')}
+      ${note('Чего Revit за тебя не сделает', 'Он не придумает удобную планировку и не подтвердит, что дом можно строить. Модель тоже можно собрать неправильно.', 'r1-caution')}
+      ${answer('Удалил дверь на плане. Она исчезнет и в 3D?', '<p>Да, если ты удалил именно дверь модели. Удаление объекта и скрытие объекта на одном виде не одно и то же.</p>')}
+      ${refs([['tour','модель и связанные виды']])}`
+    },
+    {
+      id: 'home', title: 'Что открыть на стартовом экране', hint: 'Проект, семейство и три похожих расширения', tags: 'главная recent home новый открыть rvt rte rfa models projects families',
+      body: `<p>На старте главное не перепутать <b>проект</b> и <b>семейство</b>. Проект нужен, чтобы делать дом. Семейство нужно, чтобы отдельно сделать или изменить объект, например дверь.</p>
+      <div class="r1-file-grid"><div><code>.RVT</code><b>Проект</b><p>Твой дом, его виды, листы и таблицы.</p></div><div><code>.RTE</code><b>Шаблон проекта</b><p>Настройки, из которых начинаешь новый проект.</p></div><div><code>.RFA</code><b>Семейство</b><p>Отдельный загружаемый объект: окно, дверь, стол.</p></div></div>
+      <h4>Выбери по тому, что у тебя уже есть</h4>${steps([
+        '<b>Уже есть файл дома .RVT?</b> Нажми «Открыть» в разделе проектов/моделей (<span lang="en">Models → Open</span>) или <kbd>Ctrl</kbd> + <kbd>O</kbd>.',
+        '<b>Начинаешь дом с нуля?</b> Выбери «Создать» в разделе проектов (<span lang="en">Models → New</span>). Дальше укажи шаблон .RTE. Разберём это в пункте 4.',
+        '<b>Получил окно .RFA и хочешь поставить его в дом?</b> Сначала открой проект. Затем <b>Вставить → Загрузить семейство</b> (<span lang="en">Insert → Load Family</span>). Двойной щелчок по .RFA откроет редактор семейства, а не поставит окно в дом.'
+      ])}
+      ${terms([['Models / Projects','Проекты или модели'],['Families','Семейства'],['New / Open','Создать / Открыть'],['Recent Files','Последние файлы']])}
+      <p>Стартовый экран может выглядеть иначе в зависимости от обновления Revit 2024. Смотри на действие и тип файла, а не на точное место кнопки.</p>
+      ${note('Файл из списка последних не открывается', 'Возможно, его перенесли или переименовали. Список последних файлов не хранит копию проекта. Найди сам .RVT через «Открыть».', 'r1-caution')}
+      ${note('Работаем в Revit 2024', 'Не пересохраняй учебный файл в более новой версии без согласования. Revit не умеет сохранять проект обратно в старую версию.', 'r1-caution')}
+      ${answer('Я открыл .RFA, а вокруг нет моего дома. Что случилось?', '<p>Открылся редактор семейства. Вернись в проект .RVT и загрузи туда семейство через «Вставить → Загрузить семейство».</p>')}
+      ${refs([['open','открытие файлов и версии'],['create','создание проекта'],['load','загрузка семейств']])}`
+    },
+    {
+      id: 'save', title: 'Как сохранить и не потерять проект', hint: 'Папка, копия файла и напоминание о сохранении', tags: 'options настройки параметры сохранить резервная копия autosave автосохранение general backup ctrl s',
+      body: `<p>Сначала создай отдельную папку курса и сохрани проект туда. Не оставляй единственную копию в «Загрузках» на компьютере аудитории.</p>
+      <div class="r1-example"><span class="r1-kicker">Пример имён файлов</span><pre>Revit_26ИС03/
+  Иванов_пара01.rvt
+  Иванов_пара01_копия.rvt</pre><p>Имя может быть другим. Главное, чтобы ты понимал, какой файл рабочий. «Финал_точно_последний_7» через неделю уже не поможет.</p></div>
+      <h4>Сделай сейчас</h4>${steps([
+        'В открытом проекте выбери <b>Файл → Сохранить как → Проект</b> (<span lang="en">File → Save As → Project</span>). Укажи свою папку и понятное имя.',
+        'Во время работы сохраняй изменения через <kbd>Ctrl</kbd> + <kbd>S</kbd>. Перед экспериментами используй «Сохранить как», чтобы оставить исходную версию.',
+        'Открой <b>Файл → Параметры → Общие</b> (<span lang="en">File → Options → General</span>). Для напоминания о сохранении выбери, например, 15 минут. Это предложение для практики, не обязательная настройка курса.',
+        'Сохрани, закрой проект и открой именно этот .RVT ещё раз. Убедись, что изменения на месте. Копию после пары перенеси в своё хранилище.'
+      ])}
+      ${note('Напоминание не равно автосохранению', 'Save reminder interval задаёт, когда Revit предложит сохранить файл. Само напоминание не сохраняет твою работу.', 'r1-caution')}
+      <h4>Где какие настройки</h4>${terms([['File → Options','Параметры программы: интерфейс, графика, пути, напоминания'],['Manage → Project Units','Управление → Единицы проекта: миллиметры, метры, площади'],['Save As','Сохранить как: отдельная копия с другим именем или в другой папке']])}
+      <p>Единицы проекта и настройки программы не одно и то же. Если размеры показываются в футах, не надо перебирать все параметры графики.</p>
+      ${answer('Revit напоминает сохраняться каждые 15 минут. Значит, файл сохраняется сам?', '<p>Нет. Сохраняешь ты. Проверка простая: внеси изменение, нажми Ctrl + S, закрой и снова открой файл.</p>')}
+      ${refs([['options','напоминания и общие параметры'],['templates','единицы и настройки проекта']])}`
+    },
+    {
+      id: 'template', title: 'Создай проект из шаблона', hint: 'Откуда взять .RTE и что выбрать в окне создания', tags: 'template rte шаблон архитектурный architectural metric метрический project new browse',
+      body: `<p>Шаблон это заготовка с настройками. В нём могут уже быть уровни, виды, типы стен, загруженные окна, единицы и оформление. Ты начинаешь свой дом на этой основе, а не настраиваешь всё с нуля.</p>
+      <div class="r1-flow"><div><code>Шаблон .RTE</code><span>Берём стартовые настройки</span></div><span class="r1-flow-arrow" aria-hidden="true">→</span><div><code>Твой проект .RVT</code><span>Дальше сохраняем и меняем его</span></div></div>
+      <h4>Что нажать</h4>${steps([
+        '<b>Файл → Создать → Проект</b> (<span lang="en">File → New → Project</span>). То же окно открывает New в разделе Models на стартовом экране.',
+        'В поле <b>Файл шаблона</b> (<span lang="en">Template file</span>) выбери шаблон, который используем на паре. Если он лежит отдельным .RTE, нажми <b>Обзор</b> (<span lang="en">Browse</span>).',
+        'Внизу, в разделе <b>Создать</b> (<span lang="en">Create new</span>), выбери <b>Проект</b> (<span lang="en">Project</span>), а не «Шаблон проекта» (<span lang="en">Project template</span>).',
+        'Нажми OK. Открой план этажа в Диспетчере и сохрани новый файл как .RVT.'
+      ])}
+      <div class="r1-example"><span class="r1-kicker">Проверка выбора, не скриншот окна</span><dl class="r1-terms"><div><dt>Template file</dt><dd>Тот .RTE, который выбрали для пары</dd></div><div><dt>Create new</dt><dd><b>Project / Проект</b></dd></div><div><dt>После сохранения</dt><dd><b>.RVT</b>, не .RTE</dd></div></dl></div>
+      ${note('В списке нет шаблона', 'Это не повод выбирать случайный файл. Для упражнения подойдёт установленный метрический архитектурный шаблон. Если шаблонов вообще нет, скажи мне: нужен .RTE или установка соответствующего содержимого. Для семестрового дома используем согласованный шаблон.', 'r1-caution')}
+      <p>Добавить свой .RTE в список можно через <b>Файл → Параметры → Расположение файлов</b> (<span lang="en">File → Options → File Locations</span>). Путь зависит от установки, заучивать его не нужно.</p>
+      ${answer('Если поменять мой проект, исходный шаблон тоже поменяется?', '<p>Нет. Созданный проект это отдельный файл. Твои новые стены и окна не записываются обратно в .RTE.</p>')}
+      ${refs([['create','проект из шаблона'],['templates','что хранится в шаблоне'],['paths','список и пути шаблонов']])}`
+    },
+    {
+      id: 'ribbon', title: 'Лента: где искать команды', hint: 'Вкладки, панели и почему часть кнопок пропала', tags: 'интерфейс вкладка ribbon architecture modify лента свернуть разрешение contextual контекстная',
+      body: `<p>Верхняя полоса с инструментами называется <b>лентой</b>. В ней есть вкладки, во вкладках панели, а на панелях команды. В «Архитектуре» ищем стены и двери, во «Вставить» подгружаем файлы, во «Вид» работаем с видами.</p>
+      ${figure('interface.png','Интерфейс Revit с пронумерованными областями','Общий экран из справки Autodesk. Подписи могут быть на английском; нужные номера разобраны ниже.','ui')}
+      ${terms([['12 · Ribbon','Лента с командами'],['5 · Options Bar','Строка параметров текущей команды'],['7 · Properties','Свойства выбранного элемента или вида'],['8 · Project Browser','Диспетчер проекта: список видов, листов и семейств'],['10 · View Control Bar','Панель управления видом: масштаб и отображение']])}
+      <h4>Проверь на одном объекте</h4>${steps([
+        'Открой вкладку <b>Архитектура</b> (<span lang="en">Architecture</span>) и найди <b>Стена</b> (<span lang="en">Wall</span>). Пока достаточно найти её, строить дом не нужно.',
+        'Выбери стену в модели. Появится контекстная вкладка <b>Изменить | Стены</b> (<span lang="en">Modify | Walls</span>) с командами для выбранного объекта.',
+        'Нажми <kbd>Esc</kbd>, при необходимости ещё раз, чтобы выйти из команды и снять выделение. Контекстная вкладка исчезнет.',
+        'Попробуй свернуть и вернуть ленту кнопкой со стрелкой рядом с вкладками. Выбирай режим, в котором видны панели и кнопки.'
+      ])}
+      ${figure('context-ribbon.png','Контекстная вкладка ленты Autodesk Revit','Пример контекстной вкладки. Её состав зависит от выбранного элемента или активной команды.','ribbon')}
+      ${note('У тебя кнопки стоят не так, как у меня', 'На узком окне панели становятся компактнее. Разверни окно Revit, раскрой панель или наведи мышь на значок и прочитай подсказку. Это не обязательно другая команда.', 'r1-caution')}
+      ${answer('Вкладка «Изменить | Стены» исчезла. Я что-то сломал?', '<p>Нет. Она нужна при выборе стены или работе соответствующей команды. Выбери стену ещё раз.</p>')}
+      ${refs([['ui','части интерфейса'],['ribbon','лента и контекстные вкладки'],['ribbonVideo','сворачивание ленты']])}`
+    },
+    {
+      id: 'shortcuts', title: 'Быстрые кнопки и сочетания клавиш', hint: 'Что стоит запомнить сейчас, а что можно оставить на потом', tags: 'quick access toolbar keyboard shortcuts горячие клавиши сочетания ctrl s ctrl z esc ks za zf wt options bar строка параметров',
+      body: `<p>Панель быстрого доступа это небольшой ряд часто используемых команд. Например, сохранение, отмена и открытие 3D-вида. Она не меняется при каждом переходе между вкладками.</p>
+      ${figure('quick-access.png','Панель быстрого доступа Autodesk Revit','Панель быстрого доступа. Набор значков можно настроить под себя.','quick')}
+      <h4>Пока хватит этого</h4><div class="r1-shortcuts"><div><kbd>Ctrl + S</kbd><span>Сохранить проект</span></div><div><kbd>Ctrl + Z</kbd><span>Отменить последнее действие</span></div><div><kbd>Esc</kbd><span>Выйти из текущей команды; повторное нажатие может снять выделение</span></div><div><kbd>WT</kbd><span>Расположить открытые виды рядом: Tile Views</span></div><div><kbd>ZF / ZX</kbd><span>Показать целиком активный вид: Zoom to Fit</span></div><div><kbd>KS</kbd><span>Открыть настройку сочетаний клавиш: Keyboard Shortcuts</span></div></div>
+      <p>Для команд вроде <b>WT</b> буквы нажимают <b>по очереди</b>, а не одновременно. Клавиатура должна быть в английской раскладке, курсор не в текстовом поле. Сочетания можно переназначать, поэтому на другом компьютере проверяй подсказку команды или окно KS.</p>
+      <h4>Добавь одну удобную кнопку</h4>${steps([
+        'Найди команду на ленте, которой часто пользуешься.',
+        'Нажми по ней правой кнопкой и выбери <b>Добавить на панель быстрого доступа</b> (<span lang="en">Add to Quick Access Toolbar</span>). Не все команды это поддерживают.',
+        'Нажми новую кнопку. Для удаления: правая кнопка по значку → <b>Удалить с панели быстрого доступа</b> (<span lang="en">Remove from Quick Access Toolbar</span>).'
+      ])}
+      <h4>Не пропусти строку параметров</h4><p><b>Options Bar</b> обычно находится под лентой. В ней параметры текущей команды. Например, при построении стены там могут быть «Цепь» (<span lang="en">Chain</span>) и смещение (<span lang="en">Offset</span>). Начни команду «Стена», посмотри, что появилось, затем выйди через Esc.</p>
+      ${note('Почему WT ничего не сделал', 'Для этого упражнения сначала открой два вида: план и 3D. Если открыт один, раскладывать рядом пока нечего.')}
+      ${answer('Я ввожу WT, а буквы печатаются в названии вида. Почему?', '<p>Сейчас активно текстовое поле. Выйди из редактирования имени, щёлкни по области вида и повтори команду.</p>')}
+      ${refs([['quick','панель быстрого доступа'],['bar','строка параметров'],['tour','работа с видами']])}`
+    },
+    {
+      id: 'properties', title: 'Диспетчер проекта и Свойства', hint: 'Где открыть план, где поменять объект и как вернуть закрытое окно', tags: 'project browser properties palette вид диспетчер свойства пользовательский интерфейс windows user interface потерял пропало окно edit type изменить тип',
+      body: `<div class="r1-two"><div><h4>Диспетчер проекта</h4><p>Отвечает на вопрос <b>«Что открыть?»</b> План, 3D, разрез, лист, таблицу. Это список содержимого проекта.</p></div><div><h4>Свойства</h4><p>Отвечают на вопрос <b>«Что выбрано и что у этого можно поменять?»</b> Выбрал стену: видишь её параметры. Снял выделение: видишь параметры текущего вида.</p></div></div>
+      ${figure('browser.png','Диспетчер проекта Autodesk Revit со списком видов','Project Browser = Диспетчер проекта. Floor Plans = планы этажей, 3D Views = 3D-виды, Sheets = листы, Families = семейства.','browser',true)}
+      <h4>Попробуй по порядку</h4>${steps([
+        'В Диспетчере раскрой <b>Планы этажей</b> (<span lang="en">Floor Plans</span>) и дважды нажми на план первого этажа. Название зависит от шаблона.',
+        'Выбери стену в области чертежа. Посмотри в Свойствах её тип и уровень. Пока не меняй значения наугад.',
+        'Нажми Esc и щёлкни по пустому месту. В Свойствах теперь будут параметры вида, например масштаб.',
+        'Закрой только окно «Свойства» его крестиком. Верни через <b>Вид → Окна → Пользовательский интерфейс → Свойства</b> (<span lang="en">View → Windows → User Interface → Properties</span>).',
+        'В том же меню включается <b>Диспетчер проекта</b> (<span lang="en">Project Browser</span>). Чтобы переместить окно, тяни за его заголовок, не за строку с видом.'
+      ])}
+      ${figure('properties.png','Палитра свойств Revit с выбором типа и кнопкой Edit Type','На примере Autodesk: 1 = выбор типа; 2 = фильтр свойств; 3 = «Изменить тип»; 4 = параметры экземпляра.','properties',true)}
+      ${note('Один клик и двойной клик делают разное', 'Один клик по имени вида в Диспетчере выбирает его. Двойной открывает. Если план не переключился, сначала проверь это, а не переустанавливай Revit.')}
+      ${note('Осторожно с «Изменить тип»', 'Edit Type открывает общие параметры типоразмера. Изменение может затронуть не один выбранный объект, а все объекты этого типа. Пример в следующем пункте.', 'r1-caution')}
+      ${answer('Стена не выделена, а в Свойствах написано «План этажа». Это нормально?', '<p>Да. Когда элементы не выбраны и команда построения не активна, палитра показывает параметры текущего вида.</p>')}
+      ${refs([['browser','Диспетчер проекта'],['properties','Свойства'],['dock','перемещение и закрепление окон']])}`
+    },
+    {
+      id: 'families', title: 'Семейства, типы и экземпляры', hint: 'Почему у стены нет обычного .RFA и как не изменить все двери сразу', tags: 'системные загружаемые loadable system family rfa типоразмер экземпляр instance type duplicate создать копия окно дверь стены',
+      body: `<p>Представь модель телефона. Есть сама линейка, есть варианты с разным объёмом памяти, а есть конкретный телефон у тебя в руке. В Revit похожая схема: <b>семейство → типоразмер → экземпляр</b>. Не точная копия устройства программы, но разницу так проще запомнить.</p>
+      <div class="r1-example"><span class="r1-kicker">На примере двери</span><div class="r1-family-chain"><div><small>Семейство / Family</small><b>Одинарная дверь</b></div><div><small>Типоразмер / Type</small><b>900 × 2100 мм</b></div><div><small>Экземпляр / Instance</small><b>Та самая дверь в спальню</b></div></div></div>
+      <h4>Два основных случая</h4><div class="r1-two"><div><h4>Системные</h4><p>Стены, перекрытия, крыши, лестницы. Их типы уже живут внутри проекта. Новую обычную стену не загружают через файл «стена.rfa»: создают или копируют тип стены в проекте.</p></div><div><h4>Загружаемые</h4><p>Двери, окна, мебель. Можно загрузить из .RFA. После загрузки семейство хранится в проекте. Отдельно существуют контекстные семейства, их сейчас не разбираем.</p></div></div>
+      <h4>Загрузи дверь</h4>${steps([
+        'Открой свою учебную копию .RVT. Выбери <b>Вставить → Загрузить семейство</b> (<span lang="en">Insert → Load Family</span>).',
+        'Выбери выданный на паре файл двери .RFA или подходящую дверь из установленной библиотеки. Если библиотека пустая, нужен отдельный набор содержимого; для упражнения возьми файл у меня.',
+        'Открой <b>Архитектура → Дверь</b> (<span lang="en">Architecture → Door</span>), выбери её тип в Свойствах и поставь в существующую стену. Обычной двери нужна стена-основа.',
+        'Поставь ещё одну дверь того же типа и выйди из команды через Esc.'
+      ])}
+      <h4>Почему меняются обе двери</h4><p>В обычном семействе ширина двери часто является <b>параметром типа</b>. Если открыть Edit Type и изменить её, изменятся обе двери этого типа. Для другого размера сначала нажми <b>Изменить тип → Копировать</b> (<span lang="en">Edit Type → Duplicate</span>), задай новое имя, а потом меняй ширину нового типа. Набор параметров зависит от семейства.</p>
+      <div class="r1-example"><b>Что проверить на двух дверях</b><p>Выбери одну дверь и найди «Комментарии» (<span lang="en">Comments</span>) в параметрах экземпляра. Введи «Проверка». У второй двери комментарий не должен появиться. Затем создай копию типа для первой и сравни, какой тип теперь указан у каждой.</p><p>Размеры 900 × 2100 мм здесь только для примера, не обязательное требование к твоему дому.</p></div>
+      ${note('Нужна одна другая дверь', 'Меняй тип выбранной двери или создавай новый тип. Не редактируй общий тип, если остальные двери должны остаться прежними.', 'r1-caution')}
+      ${answer('Нужно расширить только одно окно из пяти одинаковых. Как поступить?', '<p>Если ширина задана параметром типа, создай копию типоразмера, измени её ширину и назначь новый тип только нужному окну. Остальные четыре останутся на старом.</p>')}
+      ${refs([['system','системные семейства'],['load','загружаемые семейства'],['properties','параметры типа и экземпляра']])}`
+    }
+  ];
+  let openTopics = new Set();
+  let query = '';
+  const normalize = value => String(value).toLocaleLowerCase('ru').replace(/ё/g,'е');
+  const topicText = topic => normalize(`${topic.title} ${topic.hint} ${topic.tags} ${topic.body.replace(/<[^>]*>/g,' ')}`);
+  const matches = topic => !query || query.split(/\s+/).every(word => topicText(topic).includes(word));
+  function render({assets = 'assets/lesson-01/'} = {}) {
+    const cards = topics.map((topic,index) => `<details class="r1-topic" data-r1-topic="${topic.id}" id="r1-${topic.id}"${matches(topic) ? '' : ' hidden'}${openTopics.has(topic.id) || (query && matches(topic)) || location.hash === '#r1-'+topic.id ? ' open' : ''}><summary><span class="r1-number">${String(index+1).padStart(2,'0')}</span><span class="r1-topic-label"><b>${escape(topic.title)}</b><small>${escape(topic.hint)}</small></span><span class="r1-chevron" aria-hidden="true">+</span></summary><div class="r1-body"><a class="r1-permalink" href="#r1-${topic.id}">Ссылка на этот пункт</a>${topic.body}</div></details>`).join('');
+    return `<section class="r1-lesson" data-r1-version="1.0.0"><header class="r1-header"><span class="r1-kicker">Пара 01 · Autodesk® Revit® 2024</span><h2 id="guide-title" tabindex="-1">Начало работы и интерфейс</h2><p>Создаём проект, разбираемся с окнами и сохраняем первую учебную копию. Забыл, где какая кнопка? Открой нужный пункт ниже.</p><div class="r1-header-notes"><span>8 раскрывающихся тем</span><span>Команды на русском и английском</span></div></header><div class="r1-tools"><label for="r1-search">Найти в первой паре<input id="r1-search" type="search" value="${escape(query)}" placeholder="Например: шаблон, сохранить, свойства" autocomplete="off"></label><div class="r1-tool-buttons"><button type="button" data-r1-expand>Раскрыть всё</button><button type="button" data-r1-collapse>Свернуть всё</button></div></div><p class="r1-search-status" role="status" aria-live="polite">${query ? 'Найдено тем: '+topics.filter(matches).length : 'Нажми на название темы, чтобы открыть объяснение и практику.'}</p><div class="r1-topics">${cards}</div><section class="r1-practice" id="r1-practice"><span class="r1-kicker">В конце пары · около 10 минут</span><h3>Собери всё без моей подсказки</h3>${steps(['Создай проект из выбранного шаблона. Сохрани под своим именем как .RVT.','Открой план и 3D, расположи их рядом.','Найди Свойства, закрой их и верни через меню «Вид».','Выбери элемент и покажи его тип. Сними выделение и объясни, чьи параметры теперь в Свойствах.','Сохрани и снова открой файл. Назови, чем .RVT отличается от .RTE и .RFA.'])}<p><b>Если получилось:</b> ты можешь сам открыть проект, найти нужный вид и вернуться к работе. Если застрял, вернись к соответствующему пункту, а не начинай всё заново.</p></section><footer class="r1-footer"><p>Картинки из справки Autodesk показывают реальные элементы интерфейса. Если подписи на английском, перевод и пояснения стоят рядом. Вид окон зависит от версии, обновления и настроек. Учебные схемы отдельно подписаны и не изображают реальные окна программы.</p><p>Autodesk screen shots reprinted courtesy of Autodesk, Inc. Пояснения, примеры и упражнения подготовлены для курса; Autodesk не является его организатором. Autodesk и Revit являются товарными знаками Autodesk, Inc. и/или её дочерних и аффилированных компаний в США и других странах.</p></footer></section>`.replaceAll('__R1_ASSETS__', escape(assets));
+  }
+  document.addEventListener('toggle', event => {
+    const element = event.target;
+    if (!(element instanceof HTMLElement) || !element.matches('details[data-r1-topic]') || query) return;
+    if (element.open) openTopics.add(element.dataset.r1Topic); else openTopics.delete(element.dataset.r1Topic);
+  }, true);
+  document.addEventListener('input', event => {
+    if (event.target.id !== 'r1-search') return;
+    query = normalize(event.target.value.trim());
+    const root = event.target.closest('.r1-lesson');
+    root.querySelectorAll('[data-r1-topic]').forEach(element => {
+      const topic = topics.find(x => x.id === element.dataset.r1Topic);
+      const visible = matches(topic);
+      element.hidden = !visible;
+      element.open = query ? visible : openTopics.has(topic.id);
+    });
+    root.querySelector('.r1-search-status').textContent = query ? 'Найдено тем: '+topics.filter(matches).length : 'Нажми на название темы, чтобы открыть объяснение и практику.';
+  });
+  document.addEventListener('click', event => {
+    const button = event.target.closest('[data-r1-expand],[data-r1-collapse],[data-r1-image]');
+    if (!button) return;
+    const root = button.closest('.r1-lesson');
+    if (!root) return;
+    if (button.hasAttribute('data-r1-image')) {
+      const image = button.querySelector('img');
+      if (!image) return;
+      let dialog = document.getElementById('r1-image-dialog');
+      if (!dialog) {
+        dialog = document.createElement('dialog');
+        dialog.id = 'r1-image-dialog';
+        dialog.className = 'r1-image-dialog';
+        dialog.setAttribute('aria-label','Увеличенное изображение');
+        dialog.innerHTML = '<form method="dialog"><button aria-label="Закрыть изображение">Закрыть ×</button></form><img alt=""><p></p>';
+        document.body.append(dialog);
+        dialog.addEventListener('click', e => { if (e.target === dialog) dialog.close(); });
+      }
+      dialog.querySelector('img').src = image.src;
+      dialog.querySelector('img').alt = image.alt;
+      dialog.querySelector('p').textContent = image.alt;
+      if (typeof dialog.showModal === 'function') dialog.showModal();
+      else window.open(image.src,'_blank','noopener,noreferrer');
+      return;
+    }
+    const expand = button.hasAttribute('data-r1-expand');
+    root.querySelectorAll('[data-r1-topic]:not([hidden])').forEach(element => {
+      element.open = expand;
+      if (expand) openTopics.add(element.dataset.r1Topic); else openTopics.delete(element.dataset.r1Topic);
+    });
+  });
+  function routeToTopic() {
+    const id = location.hash.slice(4);
+    if (!location.hash.startsWith('#r1-') || !topics.some(x => x.id === id) || !window.S40) return;
+    query = '';
+    openTopics.add(id);
+    window.S40.setTab('guide');
+    document.querySelector('button[data-action="guide-lesson"][data-id="start"]')?.click();
+    requestAnimationFrame(() => {
+      const target = document.getElementById('r1-'+id);
+      if (!target) return;
+      target.hidden = false;
+      target.open = true;
+      target.scrollIntoView({block:'start'});
+      target.querySelector('summary')?.focus({preventScroll:true});
+    });
+  }
+  window.addEventListener('hashchange', routeToTopic);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', routeToTopic, {once:true});
+  else setTimeout(routeToTopic,0);
+  window.S40Lesson01 = Object.freeze({render, topicIds: Object.freeze(topics.map(x => x.id)), version:'1.0.0'});
+})();
