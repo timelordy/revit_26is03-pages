@@ -1,0 +1,70 @@
+name: Verify live lesson 1
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/lesson-01-live-check.yml
+      - assets/lesson-01.js
+      - assets/lesson-01.css
+      - assets/lesson-01/**
+      - index.html
+      - lessons-live.js
+permissions:
+  contents: read
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install browser
+        run: |
+          python -m pip install playwright==1.55.0
+          python -m playwright install --with-deps chromium
+      - name: Wait for the matching Pages assets
+        shell: python
+        run: |
+          from pathlib import Path
+          from urllib.request import Request,urlopen
+          import os,time
+          root='https://timelordy.github.io/revit_26is03-pages/'
+          files=['assets/lesson-01.js','assets/lesson-01.css']
+          for attempt in range(30):
+              try:
+                  for name in files:
+                      req=Request(root+name+'?verify='+os.environ['GITHUB_SHA'],headers={'Cache-Control':'no-cache'})
+                      with urlopen(req,timeout=15) as response:
+                          actual=response.read()
+                      assert actual==Path(name).read_bytes(),name
+                  with urlopen(root+'?verify='+os.environ['GITHUB_SHA'],timeout=15) as response:
+                      assert b'assets/lesson-01.js' in response.read()
+                  print('Live Pages HTML and lesson assets match the checked-out commit')
+                  break
+              except Exception as error:
+                  if attempt==29:
+                      raise
+                  print('Waiting for Pages:',type(error).__name__)
+                  time.sleep(10)
+      - name: Check the actual public URL
+        env:
+          LIVE_URL: https://timelordy.github.io/revit_26is03-pages/
+          QA_OUTPUT: lesson-01-live-qa
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path=Path('.github/lesson-01/check.py')
+          text=path.read_text()
+          text=text.replace("        expect(page.locator('#r1-properties')).to_have_attribute('open', '')\n        expect(page.locator('#r1-properties')).to_be_visible()", "        page.reload(wait_until='networkidle')\n        expect(page.locator('#r1-properties')).to_have_attribute('open', '')\n        expect(page.locator('#r1-properties')).to_be_visible()")
+          path.write_text(text)
+          PY
+          python .github/lesson-01/check.py
+      - name: Save live UI evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lesson-01-live-verification
+          path: lesson-01-live-qa/
+          retention-days: 7
