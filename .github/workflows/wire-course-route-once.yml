@@ -1,0 +1,42 @@
+name: Wire clearer semester route once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/wire-course-route-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  wire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Load route compatibility script
+        shell: python
+        run: |
+          from pathlib import Path
+          path=Path('index.html')
+          text=path.read_text(encoding='utf-8')
+          script='<script src="course-route-live.js"></script>'
+          if script not in text:
+              marker='</body>'
+              at=text.rfind(marker)
+              if at < 0:
+                  raise SystemExit('No final </body> marker')
+              text=text[:at]+script+text[at:]
+              path.write_text(text,encoding='utf-8')
+          Path('.github/workflows/wire-course-route-once.yml').unlink()
+
+      - name: Commit live route wiring
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/wire-course-route-once.yml
+          git diff --cached --quiet && exit 0
+          git commit -m "Load clearer semester route on Pages"
+          git push
