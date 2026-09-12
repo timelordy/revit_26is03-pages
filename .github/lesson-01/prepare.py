@@ -81,7 +81,6 @@ for name, url, page, mode in illustrations:
         image.load()
         if image.width < 120 or image.height < 20:
             raise ValueError(f'Unexpected dimensions: {name}')
-        # Preserve screenshot pixels; only normalize the file format to PNG.
         image.save(OUT / name, format='PNG')
         record = {'file': name, 'source': page, 'image_url': url, 'width': image.width,
                   'height': image.height, 'sha256': hashlib.sha256((OUT / name).read_bytes()).hexdigest(),
@@ -95,8 +94,10 @@ text = index_path.read_text(encoding='utf-8')
 css = '<link rel="stylesheet" href="assets/lesson-01.css?v=1">'
 module = '<script src="assets/lesson-01.js?v=1"></script>'
 if css not in text:
-    if text.count('</head>') != 1:
-        raise RuntimeError('Unexpected public HTML head')
+    # The application contains additional </head> strings in HTML export templates.
+    # The first closing head belongs to the actual document.
+    if '</head>' not in text:
+        raise RuntimeError('Public HTML head is missing')
     text = text.replace('</head>', css + '</head>', 1)
 if module not in text:
     marker = '<script src="lessons-live.js"></script>'
@@ -118,3 +119,6 @@ if 'window.S40Lesson01.render' not in script:
         raise RuntimeError('Existing guide renderer changed; manual reconciliation is required')
     script = script.replace(old, new, 1)
 path.write_text(script, encoding='utf-8')
+
+css_path = ROOT / 'assets' / 'lesson-01.css'
+css_path.write_text(css_path.read_text(encoding='utf-8').replace('font:400 16px/1.4 inherit;', 'font:400 16px/1.4 system-ui,sans-serif;'), encoding='utf-8')
