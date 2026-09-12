@@ -87,3 +87,5 @@
     console.warn('Two-lesson guide compatibility layer failed:', error);
   }
 })();
+
+// Pages deploy marker: first two Revit pairs only.
