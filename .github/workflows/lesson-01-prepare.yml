@@ -27,6 +27,15 @@ jobs:
           python .github/lesson-01/prepare.py
           node --check assets/lesson-01.js
           node --check lessons-live.js
+          python - <<'PY'
+          from pathlib import Path
+          path=Path('.github/workflows/lesson-01-live-check.yml')
+          text=path.read_text()
+          start=text.index('    paths:')
+          end=text.index('permissions:')
+          text=text[:start]+'    paths: [.github/workflows/lesson-01-live-check.yml]\n'+text[end:]
+          path.write_text(text)
+          PY
       - name: Browser acceptance tests
         run: python .github/lesson-01/check.py
       - name: Save review artifact
@@ -48,7 +57,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html lessons-live.js assets/lesson-01/
+          git add index.html lessons-live.js assets/lesson-01.css assets/lesson-01/ .github/workflows/lesson-01-live-check.yml
           if ! git diff --cached --quiet; then
             git commit -m 'Build and verify illustrated lesson 1'
             git push
