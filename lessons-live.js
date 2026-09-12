@@ -57,6 +57,9 @@
 
   function liveGuidePage() {
     const lesson = lessonById(liveLessonId);
+    if (lesson.id === 'start' && window.S40Lesson01) {
+      return `<article class="live-lessons"><div class="live-lessons-layout"><nav class="live-lessons-nav" aria-label="Открытые пары">${LIVE_LESSONS.map(lessonButton).join('')}</nav><section class="live-lessons-panel">${window.S40Lesson01.render({assets:'assets/lesson-01/'})}${lessonPager(lesson)}</section></div></article>`;
+    }
     const points = lesson.points.length;
     return `<article class="live-lessons">
       <header class="live-lessons-hero">
