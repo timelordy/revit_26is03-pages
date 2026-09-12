@@ -28,39 +28,7 @@ jobs:
           if old in text:
               text = text.replace(old, new, 1)
           elif new not in text and 'id="lesson-visibility-lock"' not in text:
-              shim = r'''<script id="lesson-visibility-lock">
-(() => {
-  const allowed = new Set();
-  function applyLessonVisibility() {
-    allowed.clear();
-    document.querySelectorAll('.guide-lesson-link[data-action="guide-lesson"]').forEach((el) => {
-      const match = el.textContent.match(/Урок\s*0*(\d+)/i);
-      if (match) {
-        if (Number(match[1]) <= 2) {
-          allowed.add(el.dataset.id);
-          el.hidden = false;
-        } else {
-          el.hidden = true;
-        }
-      } else {
-        allowed.add(el.dataset.id);
-      }
-    });
-    document.querySelectorAll('[data-action="guide-lesson"]:not(.guide-lesson-link)').forEach((el) => {
-      if (allowed.size && el.dataset.id && !allowed.has(el.dataset.id)) el.hidden = true;
-    });
-  }
-  document.addEventListener('click', (event) => {
-    const el = event.target.closest?.('[data-action="guide-lesson"]');
-    if (el && allowed.size && el.dataset.id && !allowed.has(el.dataset.id)) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-    }
-  }, true);
-  new MutationObserver(applyLessonVisibility).observe(document.body, {childList:true, subtree:true});
-  applyLessonVisibility();
-})();
-</script>'''
+              shim = r'<script id="lesson-visibility-lock">(()=>{const a=new Set;function f(){a.clear();document.querySelectorAll(".guide-lesson-link[data-action=guide-lesson]").forEach(e=>{const m=e.textContent.match(/Урок\s*0*(\d+)/i);m?(+m[1]<=2?(a.add(e.dataset.id),e.hidden=false):e.hidden=true):a.add(e.dataset.id)});document.querySelectorAll("[data-action=guide-lesson]:not(.guide-lesson-link)").forEach(e=>{a.size&&e.dataset.id&&!a.has(e.dataset.id)&&(e.hidden=true)})}document.addEventListener("click",e=>{const t=e.target.closest?.("[data-action=guide-lesson]");t&&a.size&&t.dataset.id&&!a.has(t.dataset.id)&&(e.preventDefault(),e.stopImmediatePropagation())},true);new MutationObserver(f).observe(document.body,{childList:true,subtree:true});f()})();</script>'
               if "</body>" not in text:
                   raise SystemExit("No safe insertion point in index.html")
               text = text.replace("</body>", shim + "</body>", 1)
