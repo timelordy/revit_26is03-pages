@@ -33,7 +33,7 @@ jobs:
           from urllib.request import Request,urlopen
           import os,time
           root='https://timelordy.github.io/revit_26is03-pages/'
-          files=['assets/lesson-01-visuals.js','assets/lesson-01-visuals.css','assets/lesson-01/model-views.svg']
+          files=['assets/lesson-01.js','assets/lesson-01-visuals.js','assets/lesson-01-visuals.css','assets/lesson-01/file-types.svg']
           for attempt in range(30):
               try:
                   for name in files:
@@ -43,52 +43,61 @@ jobs:
                       assert actual==Path(name).read_bytes(),name
                   with urlopen(root+'?verify='+os.environ['GITHUB_SHA'],timeout=15) as response:
                       html=response.read()
-                  assert b'lesson-01-visuals.js?v=2' in html
+                  assert b'lesson-01.js?v=2' in html
+                  assert b'lesson-01-visuals.js?v=4' in html
                   assert b'lesson-01-visuals.css?v=2' in html
-                  print('Live Pages HTML and visual assets match the checked-out commit')
+                  print('Live Pages HTML and lesson assets match the checked-out commit')
                   break
               except Exception as error:
                   if attempt==29:
                       raise
                   print('Waiting for Pages:',type(error).__name__)
                   time.sleep(10)
-      - name: Check visible images on the actual public URL
+      - name: Check the clarified guide on the actual public URL
         shell: python
         run: |
           from pathlib import Path
           from playwright.sync_api import sync_playwright,expect
-          url='https://timelordy.github.io/revit_26is03-pages/?visuals=2'
+          url='https://timelordy.github.io/revit_26is03-pages/?files=4'
           out=Path('lesson-01-live-qa');out.mkdir(exist_ok=True)
           with sync_playwright() as p:
               browser=p.chromium.launch()
               page=browser.new_page(viewport={'width':1440,'height':1000})
-              errors=[];page.on('pageerror',lambda error:errors.append(str(error)))
+              errors=[]
+              page.on('pageerror',lambda error:errors.append(str(error)))
               page.goto(url,wait_until='networkidle',timeout=60000)
               page.wait_for_function('window.S40 && window.S40Lesson01 && window.S40Lesson01Visuals')
               initial=page.evaluate('JSON.stringify(S40.getState())')
               page.locator('[data-tab="guide"]').click()
               page.locator('button[data-action="guide-lesson"][data-id="start"]').first.click()
+              home=page.locator('#r1-home')
+              home.locator(':scope > summary').click()
+              expect(home).to_have_attribute('open','')
+              expect(home).to_contain_text('RVT, RTE и RFA: что с ними делать')
+              expect(home).to_contain_text('рабочий файл с домом')
+              expect(home).to_contain_text('Файл → Открыть')
+              expect(home).to_contain_text('Файл → Создать → Проект')
+              expect(home).to_contain_text('Вставить → Загрузить семейство')
+              image=home.locator('.r1-topic-visual img')
+              image.evaluate('(img)=>img.loading="eager"')
+              page.wait_for_function('(img)=>img.complete&&img.naturalWidth>0',arg=image.element_handle(),timeout=45000)
+              assert 'file-types.svg?v=4' in image.get_attribute('src')
               expect(page.locator('.r1-visible-gallery img')).to_have_count(3)
               expect(page.locator('.r1-summary-thumb img')).to_have_count(8)
-              expect(page.locator('.r1-topic-visual img')).to_have_count(8)
-              expect(page.locator('#r1-why')).to_have_attribute('open','')
-              page.locator('[data-r1-expand]').click()
-              page.locator('.r1-lesson img').evaluate_all('(images)=>images.forEach(img=>img.loading="eager")')
-              page.wait_for_function('Array.from(document.querySelectorAll(".r1-lesson img")).every(img=>img.complete&&img.naturalWidth>0)',timeout=45000)
               assert page.locator('.r1-image-failed').count()==0
               assert page.evaluate('JSON.stringify(S40.getState())')==initial
               for width in [360,390,768,1440]:
                   page.set_viewport_size({'width':width,'height':900})
                   assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),width
               page.set_viewport_size({'width':1440,'height':1000})
-              page.locator('.r1-lesson').screenshot(path=str(out/'lesson-01-live-images.png'))
+              home.screenshot(path=str(out/'revit-file-types.png'))
               assert not errors,errors
               browser.close()
-          print('Live gallery, eight thumbnails and eight topic visuals verified')
+          print('Clarified RVT, RTE and RFA guide verified on the live site')
       - name: Save live UI evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: lesson-01-live-visual-verification
+          name: lesson-01-live-file-types-verification
           path: lesson-01-live-qa/
           retention-days: 7
