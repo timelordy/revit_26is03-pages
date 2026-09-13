@@ -28,7 +28,7 @@ jobs:
           if css not in text:
               text=text.replace('</head>',css+'</head>',1)
           if js not in text:
-              marker='<script src="assets/lesson-01-visuals.js?v=4"></script>'
+              marker='<script src="assets/lesson-01-visuals.js?v=5"></script>'
               if marker not in text:
                   raise SystemExit('Visual lesson script marker not found')
               text=text.replace(marker,marker+js,1)
