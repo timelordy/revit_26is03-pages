@@ -3,10 +3,20 @@
   if (window.S40Lesson01Visuals) return;
 
   const VISUALS = {
-    why: {
-      file: 'model-views.svg',
-      alt: 'Учебная схема: одна модель Revit связана с планом, разрезом, фасадом и 3D-видом',
-      caption: 'Одна модель, несколько связанных видов. Это схема курса, а не снимок интерфейса.'
+    what: {
+      file: 'what-is-revit.svg',
+      alt: 'Учебная схема: Revit собирает модель здания из строительных объектов',
+      caption: 'Revit хранит не просто линии, а объекты здания и их данные. Это учебная схема курса.'
+    },
+    model: {
+      file: 'model-logic.svg',
+      alt: 'Учебная схема логики Revit: объект, параметры, виды и листы',
+      caption: 'Один объект модели имеет параметры и показывается на разных видах. Это учебная схема курса.'
+    },
+    course: {
+      file: 'course-roadmap.svg',
+      alt: 'Учебная схема курса Revit: основа проекта, модель дома и итоговые листы',
+      caption: 'Весь семестр постепенно доводим один дом до рабочего RVT и двух листов PDF.'
     },
     home: {
       file: 'file-types.svg?v=4',
@@ -119,5 +129,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, {once: true});
   else start();
 
-  window.S40Lesson01Visuals = Object.freeze({version: '2.0.0', enhance});
+  window.S40Lesson01Visuals = Object.freeze({version: '3.0.0', enhance});
 })();

@@ -37,9 +37,9 @@ try:
         page.locator('[data-tab="guide"]').click()
         if page.locator('.r1-topic').count() == 0:
             page.locator('button[data-action="guide-lesson"][data-id="start"]').first.click()
-        expect(page.locator('.r1-topic')).to_have_count(8)
+        expect(page.locator('.r1-topic')).to_have_count(10)
         assert page.locator('button[data-action="guide-lesson"][data-id="draw-edit"]').count() == 0
-        result['checks'].append('Eight topics; later lessons remain hidden')
+        result['checks'].append('Ten foundation-first topics; later lessons remain hidden')
         page.locator('.r1-lesson').screenshot(path=str(OUTPUT / 'lesson-01-overview.png'))
 
         for topic_id in page.evaluate('S40Lesson01.topicIds'):
@@ -51,14 +51,14 @@ try:
             item.locator('.r1-answer > summary').click()
             expect(item.locator('.r1-answer')).to_have_attribute('open', '')
             item.locator(':scope > summary').click()
-        result['checks'].append('All eight disclosures, steps, source links and self-check answers work')
+        result['checks'].append('All ten disclosures, steps, source links and self-check answers work')
 
-        first_summary = page.locator('#r1-why > summary')
+        first_summary = page.locator('#r1-what > summary')
         first_summary.focus()
         first_summary.press('Enter')
-        expect(page.locator('#r1-why')).to_have_attribute('open', '')
+        expect(page.locator('#r1-what')).to_have_attribute('open', '')
         first_summary.press('Space')
-        assert not page.locator('#r1-why').evaluate('(el) => el.open')
+        assert not page.locator('#r1-what').evaluate('(el) => el.open')
         result['checks'].append('Native keyboard disclosure: Enter and Space')
 
         search = page.locator('#r1-search')
@@ -69,20 +69,20 @@ try:
         expect(page.locator('.r1-topic:not([hidden])')).to_have_count(0)
         expect(page.locator('.r1-search-status')).to_contain_text('0')
         search.fill('')
-        expect(page.locator('.r1-topic:not([hidden])')).to_have_count(8)
+        expect(page.locator('.r1-topic:not([hidden])')).to_have_count(10)
         result['checks'].append('Russian/English keyword search, no-results state and reset')
 
         page.locator('[data-r1-expand]').click()
-        expect(page.locator('.r1-topic[open]')).to_have_count(8)
+        expect(page.locator('.r1-topic[open]')).to_have_count(10)
         page.locator('.r1-figure img').evaluate_all('(images) => images.forEach(img => img.loading="eager")')
         page.wait_for_function('Array.from(document.querySelectorAll(".r1-figure img")).every(img => img.complete && img.naturalWidth > 0)', timeout=45000)
         result['images'] = page.locator('.r1-figure img').evaluate_all('(images) => images.map(img => ({src:img.getAttribute("src"),width:img.naturalWidth,height:img.naturalHeight}))')
-        assert len(result['images']) == 5
+        assert len(result['images']) >= 10
         page.locator('[data-r1-image]').first.click()
         expect(page.locator('#r1-image-dialog')).to_be_visible()
         page.keyboard.press('Escape')
         expect(page.locator('#r1-image-dialog')).not_to_be_visible()
-        result['checks'].append('All five local screenshots load; accessible image zoom closes with Escape')
+        result['checks'].append('Lesson diagrams and interface screenshots load; accessible image zoom closes with Escape')
 
         for width in [360, 390, 768, 1440]:
             page.set_viewport_size({'width': width, 'height': 900})
