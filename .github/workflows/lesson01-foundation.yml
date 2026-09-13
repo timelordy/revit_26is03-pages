@@ -1,0 +1,96 @@
+name: Build foundation-first lesson 1 on Pages
+on:
+  push:
+    branches: [lesson-01-foundation-20260913]
+    paths:
+      - .github/workflows/lesson01-foundation.yml
+      - .github/lesson01_foundation_patch.py
+permissions:
+  contents: write
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Rewrite lesson from first principles
+        run: |
+          python .github/lesson01_foundation_patch.py
+          python - <<'PY'
+          from pathlib import Path
+          path=Path('index.html')
+          text=path.read_text(encoding='utf-8')
+          text=text.replace('assets/lesson-01.js?v=2','assets/lesson-01.js?v=3')
+          text=text.replace('assets/lesson-01-visuals.js?v=4','assets/lesson-01-visuals.js?v=5')
+          path.write_text(text,encoding='utf-8')
+          PY
+          node --check assets/lesson-01.js
+          node --check assets/lesson-01-visuals.js
+          node --check lessons-live.js
+      - name: Install browser tests
+        run: |
+          python -m pip install playwright==1.55.0
+          python -m playwright install --with-deps chromium
+      - name: Test lesson order, explanations, images and existing state
+        shell: python
+        run: |
+          from functools import partial
+          from http.server import SimpleHTTPRequestHandler,ThreadingHTTPServer
+          from threading import Thread
+          from pathlib import Path
+          from playwright.sync_api import sync_playwright,expect
+          class Quiet(SimpleHTTPRequestHandler):
+              def log_message(self,*args): pass
+          server=ThreadingHTTPServer(('127.0.0.1',0),partial(Quiet,directory='.'))
+          Thread(target=server.serve_forever,daemon=True).start()
+          out=Path('lesson01-foundation-pages-qa');out.mkdir(exist_ok=True)
+          try:
+              with sync_playwright() as p:
+                  browser=p.chromium.launch()
+                  page=browser.new_page(viewport={'width':1440,'height':1000})
+                  errors=[];page.on('pageerror',lambda error:errors.append(str(error)))
+                  page.goto(f'http://127.0.0.1:{server.server_port}/',wait_until='networkidle')
+                  page.wait_for_function('window.S40 && window.S40Lesson01 && window.S40Lesson01Visuals')
+                  initial=page.evaluate('JSON.stringify(S40.getState())')
+                  page.locator('[data-tab="guide"]').click()
+                  page.locator('button[data-action="guide-lesson"][data-id="start"]').first.click()
+                  expect(page.locator('#guide-title')).to_contain_text('Revit с нуля')
+                  expect(page.locator('.r1-topic')).to_have_count(10)
+                  ids=page.locator('.r1-topic').evaluate_all('(els)=>els.map(el=>el.dataset.r1Topic)')
+                  assert ids[:4]==['what','model','course','home'],ids
+                  expect(page.locator('#r1-what')).to_contain_text('информационную модель здания')
+                  expect(page.locator('#r1-model')).to_contain_text('Модель / Model')
+                  expect(page.locator('#r1-course')).to_contain_text('Один рабочий файл .RVT')
+                  expect(page.locator('.r1-summary-thumb img')).to_have_count(10)
+                  expect(page.locator('.r1-topic-visual img')).to_have_count(10)
+                  page.locator('[data-r1-expand]').click()
+                  page.locator('.r1-lesson img').evaluate_all('(images)=>images.forEach(img=>img.loading="eager")')
+                  page.wait_for_function('Array.from(document.querySelectorAll(".r1-lesson img")).every(img=>img.complete&&img.naturalWidth>0)',timeout=45000)
+                  assert page.locator('.r1-image-failed').count()==0
+                  assert page.evaluate('JSON.stringify(S40.getState())')==initial
+                  for width in [360,390,768,1440]:
+                      page.set_viewport_size({'width':width,'height':900})
+                      assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),width
+                  page.set_viewport_size({'width':1440,'height':1000})
+                  page.locator('.r1-lesson').screenshot(path=str(out/'lesson01-foundation.png'))
+                  assert not errors,errors
+                  browser.close()
+          finally:
+              server.shutdown()
+      - name: Save review evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lesson01-foundation-pages-review
+          path: lesson01-foundation-pages-qa/
+          retention-days: 7
+      - name: Commit tested public files
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/lesson-01.js assets/lesson-01-visuals.js assets/lesson-01/what-is-revit.svg assets/lesson-01/model-logic.svg assets/lesson-01/course-roadmap.svg lessons-live.js index.html .github/lesson-01/check.py
+          git commit -m 'Teach Revit fundamentals before files and interface'
+          git push
